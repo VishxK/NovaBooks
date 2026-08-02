@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaAdmin - Book Management</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-active: #f97316;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        .brand-logo {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-logo i {
+            color: var(--sidebar-active);
+        }
+
+        .nav-link-custom {
+            color: #94a3b8;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link-custom:hover, .nav-link-custom.active {
+            color: #ffffff;
+            background-color: var(--sidebar-active);
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            margin-left: 260px;
+            padding: 2.5rem;
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Table Styling */
+        .table-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table > tbody > tr > td,
+        .table > thead > tr > th {
+            vertical-align: middle;
+            padding: 1rem 1.25rem;
+        }
+
+        .table thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .btn-orange {
+            background-color: var(--sidebar-active);
+            color: #ffffff;
+            border: none;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-orange:hover {
+            background-color: #ea580c;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="d-flex vh-100 overflow-hidden">
+    <aside class="bg-dark text-white p-3 vh-100 d-flex flex-column justify-content-between" style="width: 260px;">
+        <div>
+            <!-- Logo -->
+            <div class="d-flex align-items-center mb-4 px-2">
+                <h4 class="fw-bold text-warning m-0">📖 NovaAdmin</h4>
+            </div>
+
+            <!-- Nav Links -->
+            <div class="nav flex-column nav-pills me-3" id="admin-tab" role="tablist">
+
+                <button class="nav-link text-start text-white mb-2 active" id="btn-dashboard"
+                        onclick="switchTab('sec-dashboard', this)">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </button>
+
+                <button class="nav-link text-start text-white mb-2" id="btn-books"
+                        onclick="switchTab('sec-books', this)">
+                    <i class="bi bi-book me-2"></i> Book Management
+                </button>
+
+                <!-- 3. Order Management -->
+                <button class="nav-link text-start text-white mb-2" id="btn-orders"
+                        onclick="switchTab('sec-orders', this)">
+                    <i class="bi bi-cart-check me-2"></i> Order Management
+                </button>
+
+                <!-- 4. Customer Management -->
+                <button class="nav-link text-start text-white mb-2" id="btn-users"
+                        onclick="switchTab('sec-users', this)">
+                    <i class="bi bi-people me-2"></i> Customer Management
+                </button>
+
+                <hr class="text-secondary my-3">
+
+                <!-- Storefront Link -->
+                <a href="shop.html" class="nav-link text-start text-white-50 mb-2" target="_blank">
+                    <i class="bi bi-shop me-2"></i> View Storefront
+                </a>
+            </div>
+        </div>
+
+        <!-- Sign Out Button -->
+        <div>
+            <button class="btn btn-outline-danger w-100 text-start" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content" style="height: 100vh; overflow-y: auto;">
+
+
+        <div id="sec-dashboard" class="dashboard-section active">
+            <!-- Top Header & Quick Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold m-0">Store Overview & Analytics</h2>
+                    <p class="text-muted m-0">Real-time performance metrics and business insights.</p>
+                </div>
+                <div>
+                    <button class="btn btn-warning text-white fw-bold me-2"
+                            onclick="switchTab('sec-books', document.getElementById('btn-books'))">
+                        <i class="bi bi-plus-circle me-1"></i> Add New Book
+                    </button>
+                    <button class="btn btn-outline-dark fw-bold" onclick="loadDashboardStats()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 shadow-sm bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-white-50 fw-bold">TOTAL SALES</small>
+                                <h3 class="fw-bold mt-1 mb-0" id="stat-total-sales">LKR 0.00</h3>
+                            </div>
+                            <i class="bi bi-currency-dollar fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 shadow-sm bg-success text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-white-50 fw-bold">TOTAL ORDERS</small>
+                                <h3 class="fw-bold mt-1 mb-0" id="stat-total-orders">0</h3>
+                            </div>
+                            <i class="bi bi-cart-check fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 shadow-sm bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-dark-50 fw-bold">BOOKS IN STOCK</small>
+                                <h3 class="fw-bold mt-1 mb-0" id="stat-total-books">0</h3>
+                            </div>
+                            <i class="bi bi-book fs-1 text-black-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 border-0 shadow-sm bg-info text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-white-50 fw-bold">CUSTOMERS</small>
+                                <h3 class="fw-bold mt-1 mb-0" id="stat-total-users">0</h3>
+                            </div>
+                            <i class="bi bi-people fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <!-- Sales Trend Line Chart -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Sales Overview
+                            </h5>
+                            <span class="badge bg-light text-dark">Recent Months</span>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Status Doughnut Chart -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm p-3 h-100">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-warning"></i>Order Status</h5>
+                        <div style="height: 250px;" class="d-flex align-items-center justify-content-center">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Recent Orders Table -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0"><i class="bi bi-clock-history me-2 text-success"></i>Recent Orders
+                            </h5>
+                            <button class="btn btn-sm btn-link text-decoration-none"
+                                    onclick="switchTab('sec-orders', document.getElementById('btn-orders'))">View All
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                                </thead>
+                                <tbody id="dashRecentOrdersBody">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <button class="btn btn-sm btn-link text-decoration-none"
+                                                onclick="switchTab('sec-orders', document.getElementById('btn-orders'))">See in Order Management</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Warning Widget -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm p-3">
+                        <h5 class="fw-bold mb-3 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Low Stock
+                            Warnings</h5>
+                        <ul class="list-group list-group-flush" id="dashLowStockList">
+                            <li class="list-group-item text-muted text-center py-3">All inventory items sufficiently
+                                stocked.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="sec-books" class="dashboard-section d-none">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold m-0" style="font-family: serif; font-size: 2rem;">Book Management</h2>
+                    <p class="text-muted small m-0 mt-1">Add new titles or manage your existing bookstore inventory.</p>
+                </div>
+                <button class="btn btn-orange" onclick="openAddModal()">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Book
+                </button>
+            </div>
+
+            <!-- Stat Cards Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">TOTAL
+                                TITLES</small>
+                            <h3 class="fw-bold m-0" id="totalTitlesCount">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="icon-box bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">SYSTEM
+                                STATUS</small>
+                            <h3 class="fw-bold text-success m-0" style="font-size: 1.25rem;">Active</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center gap-3">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-database"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted fw-bold d-block text-uppercase"
+                                   style="font-size: 0.7rem;">DATABASE</small>
+                            <h3 class="fw-bold text-primary m-0" style="font-size: 1.25rem;">Connected</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Catalog Table Card -->
+            <div class="table-card">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h5 class="fw-bold m-0" style="font-family: serif;">Inventory Catalog</h5>
+                    <small class="text-muted fw-bold">TOTAL TITLES: <span id="totalTitlesHeaderCount"
+                                                                          class="text-dark">0</span></small>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle m-0">
+                        <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>TITLE</th>
+                            <th>AUTHOR</th>
+                            <th>PRICE</th>
+                            <th class="text-end" style="width: 140px;">ACTIONS</th>
+                        </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
+                                Loading inventory data...
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="sec-orders" class="dashboard-section d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold m-0">Order Management</h2>
+                    <p class="text-muted m-0">Track and manage customer book orders.</p>
+                </div>
+                <button class="btn btn-outline-dark fw-bold" onclick="loadOrdersTable(); loadOrderSummaryCards();">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Refresh Orders
+                </button>
+            </div>
+
+            <!-- Top Summary Cards Row -->
+            <div class="row g-3 mb-4">
+
+                <!-- Total Revenue Card -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-2">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase fw-semibold mb-1" style="font-size: 0.8rem;">Total Revenue</h6>
+                                <h3 class="mb-0 fw-bold" id="cardTotalRevenue">LKR 0.00</h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-wallet2 fs-4 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Orders Card -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 bg-dark text-white p-2">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase fw-semibold mb-1" style="font-size: 0.8rem;">Total Orders</h6>
+                                <h3 class="mb-0 fw-bold" id="cardTotalOrders">0</h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-bag-check fs-4 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Orders Card -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 bg-warning text-dark p-2">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-dark-50 text-uppercase fw-semibold mb-1" style="font-size: 0.8rem;">Pending Orders</h6>
+                                <h3 class="mb-0 fw-bold" id="cardPendingOrders">0</h3>
+                            </div>
+                            <div class="bg-dark bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-clock-history fs-4 text-dark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancelled Orders Card -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 bg-danger text-white p-2">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase fw-semibold mb-1" style="font-size: 0.8rem;">Cancelled Orders</h6>
+                                <h3 class="mb-0 fw-bold" id="cardCancelledOrders">0</h3>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-x-circle fs-4 text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card border-0 shadow-sm p-3">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>ORDER ID</th>
+                            <th>CUSTOMER</th>
+                            <th>DATE</th>
+                            <th>TOTAL AMOUNT</th>
+                            <th>STATUS</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Loading orders...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Update Order Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="statusForm">
+                            <input type="hidden" id="modalOrderId">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Select New Status</label>
+                                <select class="form-select" id="modalStatusSelect">
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="PROCESSING">PROCESSING</option>
+                                    <option value="COMPLETED">COMPLETED</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="saveOrderStatus()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold" id="orderDetailsModalLabel">
+                            Order Details - #<span id="modalOrderId"></span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+
+                        <div class="row mb-3 p-3 bg-light rounded">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Customer:</strong> <span id="modalCustomerName" class="text-primary">-</span></p>
+                                <p class="mb-0"><strong>Email:</strong> <span id="modalCustomerEmail" class="text-muted">-</span></p>
+                            </div>
+                            <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                                <p class="mb-1"><strong>Order Date:</strong> <span id="modalOrderDate">-</span></p>
+                                <p class="mb-0"><strong>Status:</strong> <span id="modalOrderStatus" class="badge bg-secondary">-</span></p>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3">Ordered Items</h6>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-dark">
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                                </thead>
+                                <tbody id="modalItemsTableBody">
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end fw-bold">Total Amount:</th>
+                                    <th class="text-end text-success fs-5 fw-bold" id="modalTotalAmount">LKR 0.00</th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sec-users" class="dashboard-section d-none">
+            <h2 class="fw-bold">Customer Management</h2>
+            <p class="text-muted">Manage registered users and system access.</p>
+
+            <div class="card border-0 shadow-sm p-3">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>USER ID</th>
+                        <th>NAME</th>
+                        <th>EMAIL</th>
+                        <th>ROLE</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
+                    </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No registered customers found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </main>
+</div>
+<!-- ADD / EDIT BOOK MODAL -->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
+
+            <div class="modal-header border-bottom-0 px-4 pt-4 pb-2">
+                <div>
+                    <h4 class="modal-title fw-bold text-dark mb-1" id="modalTitle">Add New Book</h4>
+                    <p class="text-muted small mb-0">Enter details to add or edit a book in the store catalog.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body px-4 py-3">
+                <form id="addBookForm">
+                    <input type="hidden" id="bookId"> <!-- Hidden ID for Edit Mode -->
+
+                    <!-- Title & Category Row -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold small text-secondary">Book Title</label>
+                            <input type="text" id="bookTitle" name="title" class="form-control"
+                                   placeholder="e.g. Refactoring" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small text-secondary">Category</label>
+                            <select id="bookCategorySelect" name="categoryId" class="form-select"
+                                    onchange="handleCategoryChange(this)" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="ADD_NEW_CAT" class="fw-bold text-primary">+ Add New Category...
+                                </option>
+                            </select>
+
+                            <!-- Hidden New Category Input -->
+                            <div id="newCategoryInputGroup" class="input-group input-group-sm mt-2 d-none">
+                                <input type="text" name="newCategory" id="newCategoryName" class="form-control"
+                                       placeholder="New category name">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="cancelNewCategory()">Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Author, Price & Stock Row -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small text-secondary">Author</label>
+                            <input type="text" id="bookAuthor" name="author" class="form-control"
+                                   placeholder="e.g. Martin Fowler" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-secondary">Price (LKR)</label>
+                            <input type="number" step="0.01" id="bookPrice" name="price" class="form-control"
+                                   placeholder="7500.00" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-secondary">Quantity (Stock)</label>
+                            <input type="number" id="bookQty" name="quantity" class="form-control" value="10"
+                                   min="1" required>
+                        </div>
+                    </div>
+
+                    <!-- Image Chooser with Live Preview -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-secondary">Book Cover Image</label>
+                        <div class="d-flex align-items-center gap-3 p-2 border rounded bg-light">
+                            <div class="bg-white border rounded d-flex align-items-center justify-content-center overflow-hidden"
+                                 style="width: 65px; height: 85px; flex-shrink: 0;">
+                                <img id="imagePreview" src="" class="img-fluid d-none"
+                                     style="height: 100%; object-fit: cover;">
+                                <span id="imagePlaceholder"
+                                      class="text-muted small text-center px-1">No Image</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <input type="file" id="bookImageFile" name="imageFile" class="form-control"
+                                       accept="image/*" onchange="previewImage(event)">
+                                <div class="form-text small">Select a JPG, PNG, or WEBP image from your computer.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small text-secondary">Description</label>
+                        <textarea id="bookDescription" name="description" class="form-control" rows="3"
+                                  placeholder="Enter book summary or description..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer border-top-0 px-4 pb-4">
+                <button type="button" class="btn btn-light px-4 fw-bold text-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-orange px-4 shadow-sm" onclick="saveBookWithDetails()">Save
+                    Book
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let globalBooksList = [];
+    let salesChartInstance = null;
+    let orderChartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadInventoryCatalog();
+        loadCategories();
+        loadDashboardStats();
+        loadOrdersTable();
+        loadOrderSummaryCards()
+    });
+
+    async function loadInventoryCatalog() {
+        const tableBody = document.getElementById('inventoryTableBody');
+        const totalTitlesCountCard = document.getElementById('totalTitlesCount');
+        const totalTitlesCountHeader = document.getElementById('totalTitlesHeaderCount');
+
+        try {
+            const response = await fetch('api/admin/books');
+            if (!response.ok) throw new Error("Failed to fetch inventory");
+
+            globalBooksList = await response.json();
+
+            if (totalTitlesCountCard) totalTitlesCountCard.innerText = globalBooksList.length;
+            if (totalTitlesCountHeader) totalTitlesCountHeader.innerText = globalBooksList.length;
+
+            if (!globalBooksList || globalBooksList.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No books found in inventory. Click '+ Add New Book' to get started.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = globalBooksList.map(book => {
+                const id = book.id || book.bookId || 'N/A';
+                const title = book.title || 'Untitled';
+                const author = book.author || 'Unknown';
+                const price = book.price ? parseFloat(book.price).toFixed(2) : '0.00';
+                const imgPath = book.image_path || book.imagePath || book.image || 'images/default-book.png';
+                const qty = book.quantity !== undefined ? book.quantity : (book.qty || 0);
+
+                return `
+                        <tr>
+                            <td class="fw-bold text-secondary">#${id}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="${imgPath}"
+                                         onerror="this.onerror=null; this.src='https://via.placeholder.com/40x50?text=Book';"
+                                         class="rounded me-3 shadow-sm"
+                                         style="width: 40px; height: 50px; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-bold text-dark">${title}</div>
+                                        <small class="text-muted">Stock: ${qty} units</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-secondary">${author}</td>
+                            <td class="fw-bold text-dark">Rs. ${price}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBook(${id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+            }).join('');
+
+        } catch (error) {
+            console.error("Error loading inventory:", error);
+            if (tableBody) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error loading inventory catalog. Ensure backend servlet/resource is running.</td></tr>`;
+            }
+        }
+    }
+
+    async function loadCategories() {
+        const categorySelect = document.getElementById('bookCategorySelect');
+        if (!categorySelect) return;
+
+        try {
+            const response = await fetch('api/admin/categories');
+            if (response.ok) {
+                const categories = await response.json();
+
+                categorySelect.innerHTML = `
+                <option value="" disabled>Select Category</option>
+                ${categories.map(c => `<option value="${c.categoryId || c.id}">${c.name}</option>`).join('')}
+                <option value="ADD_NEW_CAT" class="fw-bold text-primary">+ Add New Category...</option>
+            `;
+            }
+        } catch (err) {
+            console.error("Failed to load categories:", err);
+        }
+    }
+
+    function handleCategoryChange(selectElement) {
+        const newCatInputGroup = document.getElementById('newCategoryInputGroup');
+        if (selectElement.value === 'ADD_NEW_CAT') {
+            newCatInputGroup.classList.remove('d-none');
+            document.getElementById('newCategoryName').focus();
+        } else {
+            newCatInputGroup.classList.add('d-none');
+        }
+    }
+
+    function cancelNewCategory() {
+        const select = document.getElementById('bookCategorySelect');
+        select.value = "";
+        document.getElementById('newCategoryInputGroup').classList.add('d-none');
+    }
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        const previewImg = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('imagePlaceholder');
+
+        if (file) {
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.classList.remove('d-none');
+            placeholder.classList.add('d-none');
+        } else {
+            previewImg.classList.add('d-none');
+            placeholder.classList.remove('d-none');
+        }
+    }
+
+    function openAddModal() {
+        loadCategories();
+        document.getElementById('modalTitle').innerText = 'Add New Book';
+        document.getElementById('addBookForm').reset();
+        document.getElementById('bookId').value = '';
+
+        cancelNewCategory();
+        document.getElementById('imagePreview').classList.add('d-none');
+        document.getElementById('imagePlaceholder').classList.remove('d-none');
+
+        const modal = new bootstrap.Modal(document.getElementById('addBookModal'));
+        modal.show();
+    }
+
+    async function openEditModal(bookId) {
+        await loadCategories();
+
+        const book = globalBooksList.find(b => (b.id || b.bookId) === bookId);
+        if (!book) return;
+
+        document.getElementById('modalTitle').innerText = 'Edit Book Details';
+        document.getElementById('bookId').value = bookId;
+        document.getElementById('bookTitle').value = book.title || '';
+        document.getElementById('bookAuthor').value = book.author || '';
+        document.getElementById('bookPrice').value = book.price || '';
+        document.getElementById('bookQty').value = book.quantity || book.qty || 0;
+        document.getElementById('bookDescription').value = book.description || '';
+
+        let selectedCatId = '';
+        if (book.categoryId) {
+            selectedCatId = (typeof book.categoryId === 'object')
+                ? (book.categoryId.categoryId || book.categoryId.id)
+                : book.categoryId;
+        } else if (book.category) {
+            selectedCatId = (typeof book.category === 'object')
+                ? (book.category.categoryId || book.category.id)
+                : book.category;
+        }
+
+        const categorySelect = document.getElementById('bookCategorySelect');
+        if (categorySelect && selectedCatId) {
+            categorySelect.value = String(selectedCatId);
+        }
+
+        const imgPath = book.image_path || book.imagePath || book.image;
+        const previewImg = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('imagePlaceholder');
+
+        if (imgPath && previewImg) {
+            previewImg.src = imgPath;
+            previewImg.classList.remove('d-none');
+            if (placeholder) placeholder.classList.add('d-none');
+        }
+
+        const modalEl = document.getElementById('addBookModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+
+
+    async function saveBookWithDetails() {
+        const bookId = document.getElementById('bookId').value;
+        const title = document.getElementById('bookTitle').value.trim();
+        const author = document.getElementById('bookAuthor').value.trim();
+        const price = document.getElementById('bookPrice').value.trim();
+        const qty = document.getElementById('bookQty').value.trim();
+        const description = document.getElementById('bookDescription').value.trim();
+
+        const categorySelect = document.getElementById('bookCategorySelect');
+        const categoryValue = categorySelect ? categorySelect.value : '';
+
+        const newCatInput = document.getElementById('newCategoryName');
+        const newCategoryName = newCatInput ? newCatInput.value.trim() : '';
+
+        if (!title || !price) {
+            alert("Please fill in Title and Price!");
+            return;
+        }
+
+        if (!categoryValue && !newCategoryName) {
+            alert("Please select a Category or enter a New Category name!");
+            return;
+        }
+
+        const formData = new FormData();
+        if (bookId) {
+            formData.append('id', bookId);
+        }
+        formData.append('title', title);
+        formData.append('author', author);
+        formData.append('price', price);
+        formData.append('quantity', qty);
+        formData.append('description', description);
+
+        if (categoryValue === 'ADD_NEW_CAT') {
+            if (!newCategoryName) {
+                alert("Please type the new category name!");
+                return;
+            }
+            formData.append('newCategory', newCategoryName);
+        } else if (categoryValue) {
+            formData.append('categoryId', categoryValue);
+        } else if (newCategoryName) {
+            formData.append('newCategory', newCategoryName);
+        }
+
+        const fileInput = document.getElementById('bookImageFile');
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append('imageFile', fileInput.files[0]);
+        }
+
+        try {
+            const response = await fetch('api/admin/books/save', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+
+                const modalEl = document.getElementById('addBookModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                if (typeof loadInventoryCatalog === 'function') loadInventoryCatalog();
+                if (typeof loadCategories === 'function') loadCategories();
+
+                alert(result.message || "Book saved successfully!");
+            } else {
+                alert(result.message || result.error || "Server failed to save book.");
+            }
+
+        } catch (err) {
+            console.error("Save book error:", err);
+            alert("Error connecting to server: " + err.message);
+        }
+    }
+
+    async function deleteBook(id) {
+        if (!confirm(`Are you sure you want to delete book #${id}?`)) return;
+
+        try {
+            const response = await fetch(`api/admin/books/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                loadInventoryCatalog();
+                alert("Book deleted successfully!");
+            } else {
+                alert("Failed to delete book.");
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    function switchTab(sectionId, btnElement) {
+        const sections = document.querySelectorAll('.dashboard-section');
+        sections.forEach(sec => sec.classList.add('d-none'));
+
+        const buttons = document.querySelectorAll('#admin-tab .nav-link');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) targetSection.classList.remove('d-none');
+        if (btnElement) btnElement.classList.add('active');
+
+        if (sectionId === 'sec-dashboard') {
+            loadDashboardStats();
+
+        } else if (sectionId === 'sec-books' && typeof loadInventoryCatalog === 'function') {
+            loadInventoryCatalog();
+
+        } else if (sectionId === 'sec-orders') {
+            loadOrdersTable();
+            if (typeof loadOrderSummaryCards === 'function') {
+                loadOrderSummaryCards();
+            }
+
+        } else if (sectionId === 'sec-users') {
+            loadCustomersTable();
+        }
+    }
+
+    function loadDashboardStats() {
+        fetch('api/admin/dashboard/stats')
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('stat-total-sales').innerText = 'LKR ' + parseFloat(data.totalSales || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
+                document.getElementById('stat-total-orders').innerText = data.totalOrders || 0;
+                document.getElementById('stat-total-books').innerText = data.totalBooks || 0;
+                document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
+
+                const salesLabels = (data.salesChart && data.salesChart.labels.length > 0) ? data.salesChart.labels : ['No Sales'];
+                const salesValues = (data.salesChart && data.salesChart.data.length > 0) ? data.salesChart.data : [0];
+
+                renderSalesChart(salesLabels, salesValues);
+                renderOrderStatusChart(data.orderStatusChart || { COMPLETED: 0, PENDING: 0, CANCELLED: 0 });
+            })
+            .catch(err => {
+                console.error("Error loading dashboard stats:", err);
+            });
+    }
+
+    function renderSalesChart(labels, dataPoints) {
+        const canvas = document.getElementById('salesChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (salesChartInstance) salesChartInstance.destroy();
+
+        salesChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sales Revenue (LKR)',
+                    data: dataPoints,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.15)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#0d6efd'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderOrderStatusChart(statusData) {
+        const canvas = document.getElementById('orderStatusChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (orderChartInstance) orderChartInstance.destroy();
+
+        orderChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: [
+                        statusData.COMPLETED || 0,
+                        statusData.PENDING || 0,
+                        statusData.CANCELLED || 0
+                    ],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+
+    function loadOrdersTable() {
+        fetch('api/order-details/list')
+            .then(response => response.json())
+            .then(orders => {
+                const tbody = document.getElementById('ordersTableBody');
+                tbody.innerHTML = '';
+
+                if (orders.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No orders placed yet.</td></tr>`;
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const customerName = order.customerName ? order.customerName : 'Guest Customer';
+                    const orderDate = new Date(order.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+                    let statusBadge = '';
+                    if (order.status === 'COMPLETED') statusBadge = `<span class="badge bg-success">COMPLETED</span>`;
+                    else if (order.status === 'PENDING') statusBadge = `<span class="badge bg-warning text-dark">PENDING</span>`;
+                    else if (order.status === 'PROCESSING') statusBadge = `<span class="badge bg-info text-dark">PROCESSING</span>`;
+                    else statusBadge = `<span class="badge bg-danger">CANCELLED</span>`;
+
+                    const row = `
+                    <tr>
+                        <td class="fw-bold">#ORD-${order.id}</td>
+                        <td>${customerName}</td>
+                        <td>${orderDate}</td>
+                        <td class="fw-bold">LKR ${parseFloat(order.totalAmount).toFixed(2)}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="openStatusModal(${order.id}, '${order.status}')">
+                                <i class="bi bi-pencil-square me-1"></i> Update Status
+                            </button>
+
+                            <button class="btn btn-sm btn-info text-white" onclick="viewOrderDetails(${order.id})">
+                            <i class="bi bi-eye"></i> View Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(err => {
+                console.error("Error loading orders:", err);
+                document.getElementById('ordersTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">Failed to load orders.</td></tr>`;
+            });
+    }
+
+    function openStatusModal(orderId, currentStatus) {
+        document.getElementById('modalOrderId').value = orderId;
+        document.getElementById('modalStatusSelect').value = currentStatus;
+
+        const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+        modal.show();
+    }
+
+    function saveOrderStatus() {
+        const orderId = document.getElementById('modalOrderId').value;
+        const newStatus = document.getElementById('modalStatusSelect').value;
+
+        const formData = new URLSearchParams();
+        formData.append('orderId', orderId);
+        formData.append('status', newStatus);
+
+        fetch('api/admin/orders/update-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const modalEl = document.getElementById('updateStatusModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+
+                    loadOrdersTable();
+                    if (typeof loadDashboardStats === 'function') loadDashboardStats(); // Refresh dashboard stats
+                }
+            })
+            .catch(err => console.error("Error updating status:", err));
+    }
+
+
+    function viewOrderDetails(orderId) {
+        fetch(`api/order-details?id=${orderId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch order details");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const order = data.order;
+
+                    document.getElementById('modalOrderId').textContent = order.id;
+                    document.getElementById('modalCustomerName').textContent = order.customerName || 'Guest Customer';
+                    document.getElementById('modalCustomerEmail').textContent = order.customerEmail || 'N/A';
+                    document.getElementById('modalOrderDate').textContent = order.orderDate || 'N/A';
+
+                    const statusBadge = document.getElementById('modalOrderStatus');
+                    statusBadge.textContent = order.status;
+                    statusBadge.className = 'badge ' + getStatusBadgeClass(order.status);
+
+                    const tbody = document.getElementById('modalItemsTableBody');
+                    tbody.innerHTML = '';
+
+                    if (order.items && order.items.length > 0) {
+                        order.items.forEach(item => {
+                            const subtotal = item.price * item.quantity;
+                            const row = `
+                            <tr>
+                                <td class="fw-semibold">${item.bookTitle}</td>
+                                <td class="text-end">LKR ${item.price.toFixed(2)}</td>
+                                <td class="text-center"><span class="badge bg-light text-dark border">${item.quantity}</span></td>
+                                <td class="text-end fw-bold">LKR ${subtotal.toFixed(2)}</td>
+                            </tr>
+                        `;
+                            tbody.innerHTML += row;
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No items found in this order.</td></tr>`;
+                    }
+
+                    document.getElementById('modalTotalAmount').textContent = `LKR ${order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}`;
+
+                    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+                    modal.show();
+
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching order details:", error);
+                alert("Order details loading failed");
+            });
+    }
+
+    function loadOrderSummaryCards() {
+        fetch('api/order-details/summary')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    document.getElementById('cardTotalOrders').textContent = data.totalOrders;
+                    document.getElementById('cardPendingOrders').textContent = data.pendingOrders;
+                    document.getElementById('cardCancelledOrders').textContent = data.cancelledOrders;
+
+                    const formattedRevenue = new Intl.NumberFormat('en-LK', {
+                        style: 'currency',
+                        currency: 'LKR',
+                        minimumFractionDigits: 2
+                    }).format(data.totalRevenue);
+
+                    document.getElementById('cardTotalRevenue').textContent = formattedRevenue;
+                } else {
+                    console.error('Error fetching summary:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Summary load error:', error);
+            });
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'COMPLETED': return 'bg-success';
+            case 'PROCESSING': return 'bg-warning text-dark';
+            case 'PENDING': return 'bg-info text-dark';
+            case 'CANCELLED': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+
+
+    function loadCustomersTable() {
+        fetch('api/admin/customers')
+            .then(response => response.json())
+            .then(customers => {
+                const tbody = document.getElementById('customerTableBody');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+
+                if (!customers || customers.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No registered customers found.</td></tr>`;
+                    return;
+                }
+
+                customers.forEach(customer => {
+                    const isBlocked = customer.status === 'BLOCKED' || customer.status === 'INACTIVE';
+                    const statusBadge = isBlocked
+                        ? `<span class="badge bg-danger">BLOCKED</span>`
+                        : `<span class="badge bg-success">ACTIVE</span>`;
+
+                    const actionButton = isBlocked
+                        ? `<button class="btn btn-sm btn-outline-success" onclick="toggleCustomerStatus(${customer.id}, 'ACTIVE')">Activate</button>`
+                        : `<button class="btn btn-sm btn-outline-danger" onclick="toggleCustomerStatus(${customer.id}, 'BLOCKED')">Block</button>`;
+
+                    const row = `
+                    <tr>
+                        <td><strong>#USR-${customer.id}</strong></td>
+                        <td>${customer.name || 'N/A'}</td>
+                        <td>${customer.email}</td>
+                        <td><span class="badge bg-secondary">${customer.role}</span></td>
+                        <td>${statusBadge}</td>
+                        <td>${actionButton}</td>
+                    </tr>
+                `;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error('Error loading customers:', error);
+            });
+    }
+
+    function toggleCustomerStatus(userId, newStatus) {
+        if (!confirm(`Are you sure you want to set this user as ${newStatus}?`)) return;
+
+        fetch('api/admin/customers/toggle-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, status: newStatus })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCustomersTable();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Status update error:', error));
+    }
+</script>
+</body>
+</html>

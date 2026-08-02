@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Nova Books</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            accent: '#d97706',
+                            light: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 antialiased h-screen flex overflow-hidden">
+
+<!-- Left Side: Registration Form -->
+<div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 overflow-y-auto bg-white">
+    <div class="w-full max-w-md">
+
+        <!-- Mobile Logo -->
+        <div class="lg:hidden flex items-center gap-2 mb-8">
+            <i class="fa-solid fa-book-open text-brand-accent text-3xl"></i>
+            <span class="font-serif font-bold text-3xl tracking-tight text-brand-dark">Nova<span class="text-brand-accent">Books</span></span>
+        </div>
+
+        <h2 class="text-3xl font-serif font-bold text-brand-dark mb-2">Join Our Library</h2>
+        <p class="text-slate-500 mb-8">Create an account to track your orders, leave reviews, and build your wishlist.</p>
+
+        <div id="alertBox" class="hidden p-4 mb-6 rounded-lg text-sm border font-medium flex items-center gap-3"></div>
+
+        <form id="registerForm" class="space-y-4">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">First Name</label>
+                    <input type="text" id="firstName" required
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Last Name</label>
+                    <input type="text" id="lastName" required
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-regular fa-envelope text-slate-400"></i>
+                    </div>
+                    <input type="email" id="email" required
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-slate-400"></i>
+                    </div>
+                    <input type="password" id="password" required
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none transition-all">
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-brand-accent text-white font-semibold py-3.5 rounded-xl hover:bg-yellow-600 transition duration-300 shadow-lg shadow-brand-accent/30 mt-6">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-slate-500 mt-8">
+            Already have an account?
+            <a href="login.html" class="text-brand-dark font-bold hover:text-brand-accent transition">Sign in</a>
+        </p>
+    </div>
+</div>
+
+<!-- Right Side: Atmospheric Image (Hidden on mobile) -->
+<div class="hidden lg:flex w-1/2 relative bg-brand-dark items-center justify-center">
+    <div class="absolute inset-0 bg-brand-dark/30 z-10"></div>
+    <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=1000"
+         alt="Library Books"
+         class="absolute inset-0 w-full h-full object-cover opacity-70">
+
+    <div class="relative z-20 text-center px-12">
+        <h1 class="text-5xl font-serif font-bold text-white mb-4 leading-tight">Start Your Journey.</h1>
+        <p class="text-slate-200 text-lg max-w-md mx-auto">Gain access to thousands of curated titles, personalized recommendations, and a community of readers.</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const alertBox = document.getElementById('alertBox');
+        const data = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+        };
+
+        try {
+            const response = await fetch('api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            alertBox.className = 'p-4 mb-6 rounded-lg text-sm border font-medium flex items-center gap-3';
+
+            if (result.success) {
+                alertBox.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i> <span>Registration successful! Redirecting to login...</span>`;
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                alertBox.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation text-lg"></i> <span>${result.message}</span>`;
+            }
+        } catch (err) {
+            alertBox.className = 'p-4 mb-6 rounded-lg text-sm border font-medium flex items-center gap-3 bg-red-50 border-red-200 text-red-700';
+            alertBox.innerHTML = `<i class="fa-solid fa-wifi text-lg"></i> <span>Connection failed! Please ensure your backend is running.</span>`;
+        }
+    });
+</script>
+</body>
+</html>

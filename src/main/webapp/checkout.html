@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Nova Books</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Official PayHere JS SDK -->
+    <script type="text/javascript" src="https://www.payhere.lk/lib/payhere.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { dark: '#0F172A', accent: '#D97706', light: '#F8FAFC' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+<header class="bg-brand-dark text-white sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="shop.html" class="text-2xl font-serif font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-book-open text-brand-accent"></i> Nova Books
+        </a>
+        <span class="text-sm font-semibold text-slate-400">Secure PayHere Checkout</span>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-12 flex-grow w-full">
+    <h2 class="font-serif text-3xl font-bold text-brand-dark mb-8">Order Checkout</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Left Column: Cart Summary -->
+        <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+            <h3 class="font-serif text-xl font-bold text-brand-dark mb-4 pb-3 border-b">1. Review Your Items</h3>
+            <div id="checkoutCartList" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                <!-- Dynamic cart items rendered here -->
+            </div>
+
+            <div class="mt-6 pt-4 border-t space-y-2">
+                <div class="flex justify-between text-slate-600 text-sm">
+                    <span>Subtotal</span>
+                    <span id="subtotalText">Rs. 0.00</span>
+                </div>
+                <div class="flex justify-between text-slate-600 text-sm">
+                    <span>Islandwide Delivery</span>
+                    <span class="text-green-600 font-semibold">FREE</span>
+                </div>
+                <div class="flex justify-between text-brand-dark text-xl font-bold pt-2 border-t">
+                    <span>Total Payable</span>
+                    <span id="totalText" class="text-brand-accent">Rs. 0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+            <h3 class="font-serif text-xl font-bold text-brand-dark mb-4 pb-3 border-b">2. Delivery Details</h3>
+
+            <form id="checkoutForm" onsubmit="event.preventDefault(); processCheckout();" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">First Name</label>
+                        <input type="text" id="txtFirstName" required
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-brand-accent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Last Name</label>
+                        <input type="text" id="txtLastName" required
+                               class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-brand-accent">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
+                    <input disabled type="email" id="txtEmail" required
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-brand-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mobile Number</label>
+                    <input type="tel" id="txtPhone" placeholder="0771234567" required
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-brand-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Delivery Address</label>
+                    <input type="text" id="txtAddress" required
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-brand-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">City</label>
+                    <input type="text" id="txtCity" required
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-brand-accent">
+                </div>
+
+                <button type="submit" id="payhereBtn" class="w-full bg-brand-accent hover:bg-yellow-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <i class="fa-solid fa-lock"></i> Pay with PayHere
+                </button>
+            </form>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    let cart = JSON.parse(localStorage.getItem('nova_cart')) || [];
+    let calculatedTotal = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCheckoutCart();
+        loadLoggedUserDeliveryInfo();
+    });
+
+    function renderCheckoutCart() {
+        const list = document.getElementById('checkoutCartList');
+        const payBtn = document.getElementById('payhereBtn');
+
+        if (!cart || cart.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fa-solid fa-basket-shopping text-4xl text-slate-300 mb-2"></i>
+                    <p class="text-slate-500 text-sm">Your cart is empty.</p>
+                    <a href="shop.html" class="text-brand-accent underline font-bold text-sm mt-2 inline-block">Return to shop</a>
+                </div>`;
+
+            document.getElementById('subtotalText').textContent = `Rs. 0.00`;
+            document.getElementById('totalText').textContent = `Rs. 0.00`;
+            calculatedTotal = 0;
+
+            if (payBtn) {
+                payBtn.disabled = true;
+                payBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            return;
+        }
+
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        calculatedTotal = 0;
+        list.innerHTML = cart.map((item) => {
+            const itemTotal = item.price * item.quantity;
+            calculatedTotal += itemTotal;
+            const itemId = String(item.book_id || item.id);
+
+            return `
+                <div class="flex items-center gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition">
+                    <img src="${item.image || 'https://via.placeholder.com/80'}" class="w-14 h-18 object-cover rounded-xl shadow-sm">
+
+                    <div class="flex-grow">
+                        <h5 class="font-bold text-sm text-brand-dark line-clamp-1">${item.title}</h5>
+                        <p class="text-xs text-brand-accent font-bold mt-0.5">Rs. ${item.price.toFixed(2)}</p>
+
+                        <!-- Quantity Controller -->
+                        <div class="flex items-center gap-2 mt-2">
+                            <button type="button" onclick="changeCheckoutQty('${itemId}', -1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-100 transition">-</button>
+                            <span class="text-xs font-bold text-slate-700 px-1">${item.quantity}</span>
+                            <button type="button" onclick="changeCheckoutQty('${itemId}', 1)" class="w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-100 transition">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Item Subtotal & Delete Action -->
+                    <div class="flex flex-col items-end justify-between h-full py-1">
+                        <span class="font-bold text-sm text-brand-dark">Rs. ${itemTotal.toFixed(2)}</span>
+                        <button type="button" onclick="removeCheckoutItem('${itemId}')" class="text-slate-400 hover:text-red-500 transition p-1 mt-2" title="Remove Item">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                </div>`;
+        }).join('');
+
+        document.getElementById('subtotalText').textContent = `Rs. ${calculatedTotal.toFixed(2)}`;
+        document.getElementById('totalText').textContent = `Rs. ${calculatedTotal.toFixed(2)}`;
+    }
+
+    function showToast(message) {
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'fixed top-20 right-6 z-50 flex flex-col gap-2 pointer-events-none';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto flex items-center gap-3 bg-brand-dark text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700/80 transition-all duration-300 transform -translate-y-5 opacity-0`;
+
+        toast.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-brand-accent shrink-0">
+                <i class="fa-solid fa-cart-shopping text-sm"></i>
+            </div>
+            <div>
+                <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cart Updated</h5>
+                <p class="text-xs font-semibold text-slate-100">${message}</p>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.classList.remove('-translate-y-5', 'opacity-0');
+        });
+
+        setTimeout(() => {
+            toast.classList.add('-translate-y-5', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function changeCheckoutQty(id, delta) {
+        const itemId = String(id);
+        const item = cart.find(i => String(i.book_id || i.id) === itemId);
+        if (!item) return;
+
+        if (item.quantity + delta <= 0) {
+            removeCheckoutItem(itemId);
+            return;
+        }
+
+        item.quantity += delta;
+        saveAndRefreshCheckoutCart();
+
+        showToast(`Updated quantity for "${item.title}" (${item.quantity})`);
+    }
+
+    function showConfirmModal(title, onConfirm) {
+        const existingModal = document.getElementById('customConfirmModal');
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'customConfirmModal';
+        modal.className = 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-200 opacity-0';
+
+        modal.innerHTML = `
+            <div id="modalCard" class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 transform scale-95 transition-all duration-200 text-center">
+
+                <!-- Warning Icon -->
+                <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 text-red-500 flex items-center justify-center text-2xl mx-auto mb-4 shadow-sm">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+
+                <!-- Text Info -->
+                <h3 class="font-serif text-xl font-bold text-slate-800 mb-1">Remove Book?</h3>
+                <p class="text-slate-500 text-xs leading-relaxed mb-6">
+                    Are you sure you want to remove <span class="font-semibold text-slate-800">"${title}"</span> from your cart?
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button id="btnModalCancel" type="button" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button id="btnModalConfirm" type="button" class="flex-1 py-3 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-xs transition shadow-lg shadow-red-500/20">
+                        Yes, Remove
+                    </button>
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            document.getElementById('modalCard').classList.remove('scale-95');
+        });
+
+        const closeModal = () => {
+            modal.classList.add('opacity-0');
+            document.getElementById('modalCard').classList.add('scale-95');
+            setTimeout(() => modal.remove(), 200);
+        };
+
+        document.getElementById('btnModalCancel').onclick = closeModal;
+        document.getElementById('btnModalConfirm').onclick = () => {
+            closeModal();
+            onConfirm();
+        };
+    }
+
+    function removeCheckoutItem(id) {
+        const itemId = String(id);
+        const item = cart.find(i => String(i.book_id || i.id) === itemId);
+        const itemTitle = item ? item.title : "this book";
+
+        showConfirmModal(itemTitle, () => {
+            cart = cart.filter(i => String(i.book_id || i.id) !== itemId);
+            saveAndRefreshCheckoutCart();
+            showToast(`Removed "${itemTitle}" from cart`);
+        });
+    }
+
+    function saveAndRefreshCheckoutCart() {
+        localStorage.setItem('nova_cart', JSON.stringify(cart));
+        renderCheckoutCart();
+    }
+
+
+    function loadLoggedUserDeliveryInfo() {
+        fetch('api/checkout/user-info')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.loggedIn) {
+                    if (data.firstName) document.getElementById('txtFirstName').value = data.firstName;
+                    if (data.lastName) document.getElementById('txtLastName').value = data.lastName;
+                    if (data.email) document.getElementById('txtEmail').value = data.email;
+                    if (data.phone) document.getElementById('txtPhone').value = data.phone;
+                    if (data.address) document.getElementById('txtAddress').value = data.address;
+                    if (data.city) document.getElementById('txtCity').value = data.city;
+                }
+            })
+            .catch(err => console.error("Guest checkout mode or user info fetch failed:", err));
+    }
+
+    function validateDeliveryDetails() {
+        const firstName = document.getElementById('txtFirstName').value.trim();
+        const lastName = document.getElementById('txtLastName').value.trim();
+        const email = document.getElementById('txtEmail').value.trim();
+        const phone = document.getElementById('txtPhone').value.trim();
+        const address = document.getElementById('txtAddress').value.trim();
+        const city = document.getElementById('txtCity').value.trim();
+
+        if (!firstName || !lastName) {
+            alert("Please enter your First Name and Last Name.");
+            return false;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailPattern.test(email)) {
+            alert("Please enter a valid Email address.");
+            return false;
+        }
+
+        const phonePattern = /^0\d{9}$/;
+        if (!phone || !phonePattern.test(phone)) {
+            alert("Please enter a valid 10-digit Phone Number starting with 0 (e.g., 0771234567).");
+            return false;
+        }
+
+        if (!address) {
+            alert("Please enter your Delivery Address.");
+            return false;
+        }
+
+        if (!city) {
+            alert("Please enter your Delivery City.");
+            return false;
+        }
+
+        return { firstName, lastName, email, phone, address, city };
+    }
+
+    async function processCheckout() {
+        if (!cart || cart.length === 0) {
+            alert("Your cart is empty!");
+            return;
+        }
+
+        const deliveryDetails = validateDeliveryDetails();
+        if (!deliveryDetails) return;
+
+        const itemsSummary = cart.map(i => i.title).join(", ");
+
+        const payload = {
+            amount: calculatedTotal,
+            itemsSummary: itemsSummary || "Nova Books Purchase",
+            firstName: deliveryDetails.firstName,
+            lastName: deliveryDetails.lastName,
+            email: deliveryDetails.email,
+            phone: deliveryDetails.phone,
+            address: deliveryDetails.address,
+            city: deliveryDetails.city
+        };
+
+        try {
+            const res = await fetch('api/payment/initiate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to initiate payment");
+            }
+
+            console.log("PayHere Object received from Backend:", data);
+
+            payhere.startPayment(data);
+
+        } catch (err) {
+            console.error("Payment Initiation Error:", err);
+            alert("Payment Initialization Error: " + err.message);
+        }
+    }
+
+    payhere.onCompleted = function onCompleted(orderId) {
+        console.log("Payment Completed Successfully. Order ID: " + orderId);
+        saveOrderToBackend(orderId);
+    };
+
+    payhere.onDismissed = function onDismissed() {
+        console.log("PayHere payment modal closed by user.");
+    };
+
+    payhere.onError = function onError(error) {
+        console.error("PayHere Error:", error);
+        alert("Payment Failed! Error: " + error);
+    };
+
+    function saveOrderToBackend(payhereOrderId) {
+        const deliveryDetails = validateDeliveryDetails();
+
+        const orderPayload = {
+            payhereOrderId: payhereOrderId,
+            totalAmount: calculatedTotal,
+            cartItems: cart,
+            deliveryDetails: deliveryDetails
+        };
+
+        fetch('api/checkout/place-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderPayload)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Order Placed Successfully!");
+                    localStorage.removeItem('nova_cart');
+                    window.location.href = 'invoice.html?orderId=' + (data.orderId || payhereOrderId);
+                } else {
+                    alert("Order saved to payment gateway, but saving to DB failed: " + (data.message || "Unknown error"));
+                }
+            })
+            .catch(err => {
+                console.error("Error saving order to backend DB:", err);
+                alert("Order completed on PayHere, but network error occurred while logging order.");
+            });
+    }
+
+
+
+</script>
+
+<div id="footerContainer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("footer.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("footerContainer").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading footer:", err));
+    });
+</script>
+</body>
+</html>

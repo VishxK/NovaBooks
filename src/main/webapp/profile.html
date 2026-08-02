@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Books | My Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+          rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            accent: '#d97706',
+                            light: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 antialiased selection:bg-brand-accent selection:text-white flex flex-col min-h-screen">
+
+<!-- Sticky Navigation -->
+<nav class="sticky top-0 z-40 backdrop-blur-lg bg-white/80 border-b border-gray-200 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                 onclick="window.location.href='shop.html'">
+                <i class="fa-solid fa-book-open text-brand-accent text-2xl"></i>
+                <span class="font-serif font-bold text-2xl tracking-tight text-brand-dark">Nova<span
+                        class="text-brand-accent">Books</span></span>
+            </div>
+
+            <!-- Navbar Center Links -->
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                <a href="shop.html" class="hover:text-brand-accent transition">Shop</a>
+                <a href="about.html" class="hover:text-brand-accent transition">About Us</a>
+                <a href="contact.html" class="hover:text-brand-accent transition">Contact Us</a>
+                <a href="my-orders.html" class="hover:text-brand-accent transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-box-archive text-xs"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="profile.html" class="text-brand-accent hover:text-amber-600 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user text-xs"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-4 sm:gap-6">
+                <!-- Welcome Note -->
+                <div id="userWelcome"
+                     class="hidden sm:flex items-center gap-2 text-sm text-slate-600 font-medium border-r border-slate-200 pr-4 sm:pr-6">
+                    <i class="fa-regular fa-circle-user text-brand-accent text-lg"></i>
+                    <span>Welcome, <strong id="navUserName" class="text-brand-dark">Guest</strong>!</span>
+                </div>
+
+                <div class="h-6 w-px bg-gray-300"></div>
+
+                <!-- Dynamic Auth Actions -->
+                <div id="authActions">
+                    <a id="loginBtn" href="login.html"
+                       class="hidden flex items-center gap-2 text-sm font-semibold text-brand-accent hover:text-yellow-600 transition bg-amber-50 px-4 py-2 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </a>
+
+                    <button id="logoutBtn" onclick="logout()"
+                            class="hidden flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-red-600 transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Sign Out</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Profile Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+
+    <!-- Page Title Header -->
+    <div class="mb-8 border-b border-slate-200 pb-5">
+        <h1 class="text-3xl md:text-4xl font-serif font-bold text-brand-dark">Account Settings</h1>
+        <p class="text-slate-500 text-sm mt-1">Manage your personal information, delivery details, and account security.</p>
+    </div>
+
+    <!-- Alert / Toast Container -->
+    <div id="alertBox" class="hidden mb-6 p-4 rounded-2xl text-sm font-medium flex items-center justify-between shadow-sm transition"></div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+        <!-- Left Column: User Profile Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 text-center">
+
+            <!-- Avatar Badge -->
+            <div class="relative w-24 h-24 mx-auto mb-4">
+                <div class="w-full h-full bg-amber-50 text-brand-accent rounded-full border-2 border-brand-accent/20 flex items-center justify-center text-3xl font-serif font-bold shadow-sm" id="avatarInitials">
+                    NB
+                </div>
+                <div class="absolute bottom-0 right-0 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-white text-xs" title="Account Active">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+            </div>
+
+            <h3 id="cardFullName" class="font-serif font-bold text-xl text-brand-dark">Loading Name...</h3>
+            <p id="cardEmail" class="text-sm text-slate-500 mb-6">user@example.com</p>
+
+            <div class="space-y-2 pt-4 border-t border-slate-100 text-left">
+                <a href="my-orders.html" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium text-sm transition">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-box-archive text-brand-accent"></i>
+                        <span>My Orders</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+                </a>
+
+                <button onclick="logout()" class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-red-50 text-red-600 font-medium text-sm transition text-left">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs text-red-300"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Settings Forms (Personal Info & Security) -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- Personal & Delivery Information Form -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <i class="fa-solid fa-id-card text-brand-accent text-xl"></i>
+                    <h3 class="font-serif font-bold text-xl text-brand-dark">Personal & Delivery Info</h3>
+                </div>
+
+                <form id="profileForm" onsubmit="updateProfile(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">First Name</label>
+                            <input type="text" id="firstName" required
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Last Name</label>
+                            <input type="text" id="lastName" required
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+                            <input type="email" id="email" disabled
+                                   class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 text-sm cursor-not-allowed outline-none">
+                            <span class="text-[11px] text-slate-400 mt-1 block">Email address cannot be changed.</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile" placeholder="e.g. 0771234567"
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Delivery Address Line 1</label>
+                        <input type="text" id="addressLine1" placeholder="House No, Street Name"
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition mb-4">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Address Line 2 (Optional)</label>
+                                <input type="text" id="addressLine2" placeholder="Apartment, Suite, etc."
+                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">City</label>
+                                <input type="text" id="city" placeholder="e.g. Colombo, Kandy"
+                                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" id="saveProfileBtn"
+                                class="bg-brand-dark hover:bg-brand-accent text-white px-6 py-3 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Save Profile Changes</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Password & Security Form -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <i class="fa-solid fa-lock text-brand-accent text-xl"></i>
+                    <h3 class="font-serif font-bold text-xl text-brand-dark">Security & Password</h3>
+                </div>
+
+                <form id="passwordForm" onsubmit="updatePassword(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Password</label>
+                        <input type="password" id="currentPassword" required placeholder="••••••••"
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">New Password</label>
+                            <input type="password" id="newPassword" required placeholder="••••••••"
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" required placeholder="••••••••"
+                                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" id="savePasswordBtn"
+                                class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 px-6 py-3 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-key"></i>
+                            <span>Update Password</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadUserProfile();
+    });
+
+    async function loadUserProfile() {
+        const navUserName = document.getElementById('navUserName');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userWelcome = document.getElementById('userWelcome');
+
+        try {
+            const response = await fetch('api/checkout/user-info');
+
+            if (response.status === 401) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.loggedIn || data.isLoggedIn) {
+                if (userWelcome) userWelcome.classList.remove('hidden');
+                if (loginBtn) loginBtn.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+                document.getElementById('firstName').value = data.firstName || '';
+                document.getElementById('lastName').value = data.lastName || '';
+                document.getElementById('email').value = data.email || '';
+
+                document.getElementById('mobile').value = data.phone || data.mobile || '';
+
+                document.getElementById('addressLine1').value = data.addressLine1 || '';
+                document.getElementById('addressLine2').value = data.addressLine2 || '';
+                document.getElementById('city').value = data.city || '';
+
+                const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim() || 'Reader';
+                if (document.getElementById('cardFullName')) document.getElementById('cardFullName').textContent = fullName;
+                if (document.getElementById('cardEmail')) document.getElementById('cardEmail').textContent = data.email || '';
+                if (navUserName) navUserName.textContent = data.firstName || 'Reader';
+
+                const initials = (data.firstName ? data.firstName[0] : '') + (data.lastName ? data.lastName[0] : '');
+                if (document.getElementById('avatarInitials')) {
+                    document.getElementById('avatarInitials').textContent = initials.toUpperCase() || 'NB';
+                }
+
+            } else {
+                window.location.href = 'login.html';
+            }
+        } catch (err) {
+            console.error("Error loading user profile:", err);
+            showAlert('error', 'Failed to load user profile details.');
+        }
+    }
+
+    async function updateProfile(event) {
+        event.preventDefault();
+
+        const btn = document.getElementById('saveProfileBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+        const payload = {
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName: document.getElementById('lastName').value.trim(),
+            mobile: document.getElementById('mobile').value.trim(),
+            addressLine1: document.getElementById('addressLine1').value.trim(),
+            addressLine2: document.getElementById('addressLine2').value.trim(),
+            city: document.getElementById('city').value.trim()
+        };
+
+        try {
+            const response = await fetch('api/user/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.status || result.success) {
+                showAlert('success', result.message || 'Profile details updated successfully!');
+                loadUserProfile();
+            } else {
+                showAlert('error', result.message || 'Failed to update profile.');
+            }
+        } catch (err) {
+            showAlert('error', 'Server error while updating profile details.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>Save Profile Changes</span>`;
+        }
+    }
+
+    async function updatePassword(event) {
+        event.preventDefault();
+
+        const currentPassword = document.getElementById('currentPassword').value.trim();
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+        if (newPassword !== confirmPassword) {
+            showAlert('error', 'New password and confirm password do not match!');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showAlert('error', 'New password must be at least 6 characters long.');
+            return;
+        }
+
+        const btn = document.getElementById('savePasswordBtn');
+        const originalBtnText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Updating...`;
+
+        try {
+            const response = await fetch('api/auth/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            const result = await response.json();
+
+            if (result.status) {
+                showAlert('success', result.message || 'Password changed successfully!');
+
+                document.getElementById('passwordForm').reset();
+            } else {
+                showAlert('error', result.message || 'Failed to update password.');
+            }
+        } catch (err) {
+            console.error("Password update error:", err);
+            showAlert('error', 'Server error occurred while updating password.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnText;
+        }
+    }
+
+    function showAlert(type, message) {
+        const box = document.getElementById('alertBox');
+        box.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200', 'bg-red-50', 'text-red-800', 'border-red-200');
+
+        if (type === 'success') {
+            box.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+            box.innerHTML = `<div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i> ${message}</div>`;
+        } else {
+            box.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+            box.innerHTML = `<div class="flex items-center gap-2"><i class="fa-solid fa-circle-exclamation text-red-600"></i> ${message}</div>`;
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setTimeout(() => {
+            box.classList.add('hidden');
+        }, 5000);
+    }
+
+    async function logout() {
+        try {
+            await fetch('api/auth/logout', {method: 'POST'});
+        } catch (e) {}
+        localStorage.removeItem('nova_user');
+        window.location.href = 'login.html';
+    }
+</script>
+
+<div id="footerContainer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("footer.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("footerContainer").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading footer:", err));
+    });
+</script>
+
+</body>
+</html>

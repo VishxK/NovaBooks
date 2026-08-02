@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Books | About Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            accent: '#d97706',
+                            light: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 antialiased selection:bg-brand-accent selection:text-white flex flex-col min-h-screen">
+
+<!-- Sticky Navigation -->
+<nav class="sticky top-0 z-40 backdrop-blur-lg bg-white/80 border-b border-gray-200 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.location.href='shop.html'">
+                <i class="fa-solid fa-book-open text-brand-accent text-2xl"></i>
+                <span class="font-serif font-bold text-2xl tracking-tight text-brand-dark">Nova<span class="text-brand-accent">Books</span></span>
+            </div>
+
+            <!-- Navbar Center Links -->
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                <a href="shop.html" class="hover:text-brand-accent transition">Shop</a>
+                <a href="about.html" class="text-brand-accent transition">About Us</a>
+                <a href="contact.html" class="hover:text-brand-accent transition">Contact Us</a>
+                <a href="my-orders.html" class="hover:text-brand-accent transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-box-archive text-xs"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="profile.html" class="hover:text-brand-accent transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user text-xs"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-4 sm:gap-6">
+                <div id="userWelcome" class="hidden sm:flex items-center gap-2 text-sm text-slate-600 font-medium border-r border-slate-200 pr-4 sm:pr-6">
+                    <i class="fa-regular fa-circle-user text-brand-accent text-lg"></i>
+                    <span>Welcome, <strong id="navUserName" class="text-brand-dark">Guest</strong>!</span>
+                </div>
+
+                <div id="authActions">
+                    <a id="loginBtn" href="login.html" class="hidden flex items-center gap-2 text-sm font-semibold text-brand-accent hover:text-yellow-600 transition bg-amber-50 px-4 py-2 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </a>
+                    <button id="logoutBtn" onclick="logout()" class="hidden flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-red-600 transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Sign Out</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="flex-grow">
+
+    <!-- Hero Banner Section -->
+    <section class="bg-brand-dark text-white py-16 md:py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:24px_24px] opacity-10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <span class="inline-block bg-amber-500/10 text-brand-accent text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border border-brand-accent/20 mb-4">
+                Our Story & Passion
+            </span>
+            <h1 class="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6">Curating Stories, Inspiring Minds</h1>
+            <p class="max-w-2xl mx-auto text-slate-300 text-base md:text-lg leading-relaxed">
+                Welcome to Nova Books — your ultimate sanctuary for literature, knowledge, and boundless imagination. We bring world-class books right to your doorstep across Sri Lanka.
+            </p>
+        </div>
+    </section>
+
+    <!-- Mission & Vision Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 text-brand-accent font-semibold text-sm">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Driven by Purpose</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-brand-dark leading-tight">
+                    Making Reading Accessible & Enjoyable for Everyone
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Founded with a passion for literature and technology, Nova Books started as a humble dream to make physical books effortlessly available for book lovers. Whether you're searching for timeless classics, academic textbooks, fiction, or self-help bestsellers, we curate every title with care.
+                </p>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    We believe every book has the power to transform a life, open new horizons, and nurture creativity. Our modern platform is built to deliver a seamless shopping experience from browsing to islandwide delivery.
+                </p>
+            </div>
+
+            <!-- Stats Grid Card -->
+            <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xl grid grid-cols-2 gap-6 relative">
+                <div class="p-6 bg-amber-50/50 rounded-2xl border border-amber-100 text-center">
+                    <div class="text-3xl md:text-4xl font-serif font-bold text-brand-accent mb-1">10,000+</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Titles Available</div>
+                </div>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                    <div class="text-3xl md:text-4xl font-serif font-bold text-brand-dark mb-1">25,000+</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Happy Readers</div>
+                </div>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                    <div class="text-3xl md:text-4xl font-serif font-bold text-brand-dark mb-1">100%</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Islandwide Delivery</div>
+                </div>
+                <div class="p-6 bg-amber-50/50 rounded-2xl border border-amber-100 text-center">
+                    <div class="text-3xl md:text-4xl font-serif font-bold text-brand-accent mb-1">4.9 ★</div>
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">User Rating</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Why Choose Us / Core Values -->
+    <section class="bg-white border-y border-slate-200/80 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-3xl font-serif font-bold text-brand-dark mb-3">Why Readers Choose Nova Books</h2>
+                <p class="text-slate-500 text-sm">We combine quality service, competitive pricing, and modern technology to deliver the best online bookstore experience.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Value 1 -->
+                <div class="p-6 rounded-2xl bg-brand-light border border-slate-200/60 hover:shadow-md transition text-center group">
+                    <div class="w-14 h-14 bg-amber-100 text-brand-accent rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-book-bookmark text-xl"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Curated Collection</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Handpicked titles across fiction, tech, science, history, and children's literature.</p>
+                </div>
+
+                <!-- Value 2 -->
+                <div class="p-6 rounded-2xl bg-brand-light border border-slate-200/60 hover:shadow-md transition text-center group">
+                    <div class="w-14 h-14 bg-amber-100 text-brand-accent rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-truck-fast text-xl"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Fast Dispatch</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Reliable shipping partners ensuring safe & speedy delivery across Sri Lanka.</p>
+                </div>
+
+                <!-- Value 3 -->
+                <div class="p-6 rounded-2xl bg-brand-light border border-slate-200/60 hover:shadow-md transition text-center group">
+                    <div class="w-14 h-14 bg-amber-100 text-brand-accent rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-shield-halved text-xl"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Secure Checkout</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Multiple payment options with full transaction safety and instant confirmation.</p>
+                </div>
+
+                <!-- Value 4 -->
+                <div class="p-6 rounded-2xl bg-brand-light border border-slate-200/60 hover:shadow-md transition text-center group">
+                    <div class="w-14 h-14 bg-amber-100 text-brand-accent rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-headset text-xl"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Dedicated Support</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Our friendly support team is always ready to assist you with your orders and inquiries.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        checkNavUser();
+    });
+
+    async function checkNavUser() {
+        try {
+            const response = await fetch('api/checkout/user-info');
+            if (!response.ok) return;
+            const data = await response.json();
+
+            if (data.loggedIn || data.isLoggedIn) {
+                document.getElementById('userWelcome').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                document.getElementById('navUserName').textContent = data.firstName || 'Reader';
+            } else {
+                document.getElementById('loginBtn').classList.remove('hidden');
+            }
+        } catch (e) {
+            document.getElementById('loginBtn').classList.remove('hidden');
+        }
+    }
+
+    async function logout() {
+        try { await fetch('api/auth/logout', {method: 'POST'}); } catch (e) {}
+        window.location.href = 'login.html';
+    }
+</script>
+
+<div id="footerContainer"></div>
+<script>
+    fetch("footer.html").then(res => res.text()).then(data => {
+        document.getElementById("footerContainer").innerHTML = data;
+    });
+</script>
+
+</body>
+</html>

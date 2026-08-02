@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Invoice - NovaBooks</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        /* Print එක ගනිද්දී Buttons සහ background පාටවල් අයින් වී Clean එකට Print වීමට */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light py-4 py-md-5" style="display: none">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+                <a href="shop.html" class="btn btn-outline-secondary rounded-3">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Store
+                </a>
+                <button onclick="window.print()" class="btn btn-primary rounded-3 px-4">
+                    <i class="bi bi-printer me-1"></i> Print Invoice
+                </button>
+            </div>
+
+            <!-- Invoice Content Card -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
+                    <div>
+                        <h2 class="fw-bold text-primary mb-1">NovaBooks</h2>
+                        <p class="text-muted small mb-0">No. 123, High Level Road, Sri Lanka</p>
+                        <p class="text-muted small mb-0">support@novabooks.com | +94 11 234 5678</p>
+                    </div>
+                    <div class="text-end">
+                        <h3 class="fw-bold text-dark mb-1">INVOICE</h3>
+                        <span class="badge bg-success fs-6" id="invStatus">PAID</span>
+                    </div>
+                </div>
+
+                <!-- Customer & Order Info -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <h6 class="text-uppercase text-muted fw-bold small mb-2">Billed To:</h6>
+                        <h5 class="fw-bold mb-1" id="invCustomerName">Loading...</h5>
+                        <p class="text-muted mb-0 small" id="invCustomerEmail">-</p>
+                        <p class="text-muted mb-0 small" id="invcustPhone">-</p>
+                        <p class="text-muted mb-0 small" id="invcustAddress">-</p>
+                    </div>
+                    <div class="col-6 text-end">
+                        <h6 class="text-uppercase text-muted fw-bold small mb-2">Invoice Details:</h6>
+                        <p class="mb-1 small"><strong>Invoice No:</strong> #INV-<span id="invOrderId">-</span></p>
+                        <p class="mb-0 small"><strong>Date:</strong> <span id="invOrderDate">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Purchased Items Table -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Book Description</th>
+                            <th class="text-end" style="width: 130px;">Unit Price</th>
+                            <th class="text-center" style="width: 80px;">Qty</th>
+                            <th class="text-end" style="width: 140px;">Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody id="invItemsBody">
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Loading invoice items...</td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold fs-6">Total Amount:</td>
+                            <td class="text-end fw-bold fs-5 text-primary" id="invTotalAmount">LKR 0.00</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Thank You Footer -->
+                <div class="text-center border-top pt-4 mt-2">
+                    <p class="fw-semibold text-dark mb-1">Thank you for your purchase with NovaBooks!</p>
+                    <p class="text-muted small mb-0">If you have any questions about this invoice, please contact our
+                        support team.</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+
+        if (!orderId) {
+            alert("Order ID can't find!");
+            return;
+        }
+
+        fetch(`api/order-details?id=${orderId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.body.style.display = 'block';
+                    // 1. Details Bind කිරීම
+                    document.getElementById('invOrderId').textContent = data.order.id;
+                    document.getElementById('invOrderDate').textContent = data.order.orderDate || 'N/A';
+                    document.getElementById('invCustomerName').textContent = data.order.customerName || 'Guest Customer';
+                    document.getElementById('invCustomerEmail').textContent = data.order.customerEmail || 'N/A';
+                    document.getElementById('invcustPhone').textContent = data.delivery.phone || 'N/A';
+                    document.getElementById("invcustAddress").textContent = `${data.delivery.address}, ${data.delivery.city}`;
+                    document.getElementById('invStatus').textContent = data.order.status;
+
+                    const statusElem = document.getElementById('invStatus');
+                    if (data.order.status === 'CANCELLED') {
+                        statusElem.className = 'badge bg-danger fs-6';
+                    } else if (data.order.status === 'PENDING') {
+                        statusElem.className = 'badge bg-warning text-dark fs-6';
+                    } else {
+                        statusElem.className = 'badge bg-success fs-6';
+                    }
+
+                    const tbody = document.getElementById('invItemsBody');
+                    tbody.innerHTML = '';
+
+                    if (data.order.items && data.order.items.length > 0) {
+                        data.order.items.forEach(item => {
+                            const subtotal = item.price * item.quantity;
+                            const row = `
+                                    <tr>
+                                        <td class="fw-semibold">${item.bookTitle}</td>
+                                        <td class="text-end">LKR ${item.price.toFixed(2)}</td>
+                                        <td class="text-center">${item.quantity}</td>
+                                        <td class="text-end fw-bold">LKR ${subtotal.toFixed(2)}</td>
+                                    </tr>
+                                `;
+                            tbody.innerHTML += row;
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No items found for this order.</td></tr>`;
+                    }
+
+                    document.getElementById('invTotalAmount').textContent = `LKR ${data.order.totalAmount ? data.order.totalAmount.toFixed(2) : '0.00'}`;
+
+                }
+                else {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        window.location.href = 'shop.html';
+                    }
+                    return;
+                }
+
+            })
+            .catch(error => {
+                console.error("Error fetching invoice:", error);
+                alert("Couldn't fetch invoice details. Please try again later.");
+            });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Books | My Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+          rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            accent: '#d97706',
+                            light: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 antialiased selection:bg-brand-accent selection:text-white flex flex-col min-h-screen">
+
+<nav class="sticky top-0 z-40 backdrop-blur-lg bg-white/80 border-b border-gray-200 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                 onclick="window.location.href='shop.html'">
+                <i class="fa-solid fa-book-open text-brand-accent text-2xl"></i>
+                <span class="font-serif font-bold text-2xl tracking-tight text-brand-dark">Nova<span
+                        class="text-brand-accent">Books</span></span>
+            </div>
+
+            <!-- Navbar Center Links -->
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                <a href="shop.html" class="hover:text-brand-accent transition">Shop</a>
+                <a href="about.html" class="hover:text-brand-accent transition">About Us</a>
+                <a href="contact.html" class="hover:text-brand-accent transition">Contact Us</a>
+                <a href="my-orders.html" class="text-brand-accent hover:text-amber-600 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-box-archive text-xs"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="profile.html" class="hover:text-brand-accent transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user text-xs"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-4 sm:gap-6">
+                <!-- Welcome Note -->
+                <div id="userWelcome"
+                     class="hidden sm:flex items-center gap-2 text-sm text-slate-600 font-medium border-r border-slate-200 pr-4 sm:pr-6">
+                    <i class="fa-regular fa-circle-user text-brand-accent text-lg"></i>
+                    <span>Welcome, <strong id="userName" class="text-brand-dark">Guest</strong>!</span>
+                </div>
+
+                <div class="h-6 w-px bg-gray-300"></div>
+
+                <!-- Dynamic Auth Actions -->
+                <div id="authActions">
+                    <a id="loginBtn" href="login.html"
+                       class="hidden flex items-center gap-2 text-sm font-semibold text-brand-accent hover:text-yellow-600 transition bg-amber-50 px-4 py-2 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </a>
+
+                    <button id="logoutBtn" onclick="logout()"
+                            class="hidden flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-red-600 transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Sign Out</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Page Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+
+    <!-- Page Title Header -->
+    <div class="mb-8 border-b border-slate-200 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-serif font-bold text-brand-dark">My Orders & History</h1>
+            <p class="text-slate-500 text-sm mt-1">Track your recent book purchases, order statuses, and cancellations.</p>
+        </div>
+        <a href="shop.html" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent hover:text-amber-700 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Continue Shopping</span>
+        </a>
+    </div>
+
+    <!-- Toast / Alert Container -->
+    <div id="alertBox" class="hidden mb-6 p-4 rounded-2xl text-sm font-medium flex items-center justify-between shadow-sm transition"></div>
+
+    <!-- Orders Container -->
+    <div id="ordersContainer" class="space-y-6">
+        <!-- Dynamic Loading State -->
+        <div class="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-accent mb-3"></i>
+            <p class="text-slate-500 font-medium text-sm">Fetching your orders...</p>
+        </div>
+    </div>
+
+</main>
+
+<!-- CUSTOM CANCEL CONFIRMATION MODAL -->
+<div id="cancelModal" class="fixed inset-0 bg-brand-dark/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform transition-all">
+
+        <!-- Warning Icon -->
+        <div class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-100">
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        </div>
+
+        <h3 class="text-xl font-serif font-bold text-brand-dark mb-2">Cancel Order?</h3>
+        <p class="text-slate-500 text-sm mb-6">Are you sure you want to cancel order <strong id="cancelOrderIdText" class="text-brand-dark"></strong>? Restocked items will be returned to store.</p>
+
+        <!-- Actions -->
+        <div class="flex gap-3">
+            <button onclick="closeCancelModal()"
+                    class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
+                Keep Order
+            </button>
+            <button id="confirmCancelBtn"
+                    class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-red-600/20">
+                Yes, Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const placeholderImages = [
+        'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
+        'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400',
+        'https://images.unsplash.com/photo-1629196914208-410061e81561?auto=format&fit=crop&q=80&w=400'
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        checkAuthStatus();
+        loadOrders();
+    });
+
+    let selectedOrderIdToCancel = null;
+
+    function cancelOrder(orderId) {
+        selectedOrderIdToCancel = orderId;
+        document.getElementById('cancelOrderIdText').textContent = `#ORD-${orderId}`;
+        document.getElementById('cancelModal').classList.remove('hidden');
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelModal').classList.add('hidden');
+        selectedOrderIdToCancel = null;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const confirmBtn = document.getElementById('confirmCancelBtn');
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', async () => {
+                if (!selectedOrderIdToCancel) return;
+
+                const orderId = selectedOrderIdToCancel;
+                closeCancelModal();
+
+                try {
+                    const response = await fetch(`api/orders/cancel/${orderId}`, {
+                        method: 'POST'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status) {
+                        showAlert('success', result.message || 'Order cancelled successfully.');
+                        await loadOrders(); // Refresh order cards
+                    } else {
+                        showAlert('error', result.message || 'Could not cancel order.');
+                    }
+                } catch (err) {
+                    showAlert('error', 'Server error while cancelling order.');
+                }
+            });
+        }
+    });
+
+    async function checkAuthStatus() {
+        const userWelcome = document.getElementById('userWelcome');
+        const userName = document.getElementById('userName');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        try {
+            const response = await fetch('api/auth/me');
+            const data = await response.json();
+
+            if (data.isLoggedIn) {
+                userWelcome.classList.remove('hidden');
+                userName.textContent = data.firstName || 'Reader';
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userWelcome.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                window.location.href = 'login.html'; // Redirect guest users
+            }
+        } catch (err) {
+            const localUser = JSON.parse(localStorage.getItem('nova_user'));
+            if (localUser && localUser.firstName) {
+                userWelcome.classList.remove('hidden');
+                userName.textContent = localUser.firstName;
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userWelcome.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        }
+    }
+
+    async function loadOrders() {
+        const container = document.getElementById('ordersContainer');
+
+        try {
+            const response = await fetch('api/orders/list');
+
+            if (response.status === 401) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const orders = await response.json();
+
+            if (!orders || orders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+                        <i class="fa-solid fa-box-open text-5xl text-slate-300 mb-4"></i>
+                        <h3 class="text-xl font-serif font-bold text-brand-dark mb-2">No Orders Placed Yet</h3>
+                        <p class="text-slate-500 text-sm mb-6 max-w-sm mx-auto">Looks like you haven't bought any books yet. Explore our collection and start reading!</p>
+                        <a href="shop.html" class="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand-accent text-white px-6 py-3 rounded-xl font-semibold text-sm transition shadow-md">
+                            <i class="fa-solid fa-store"></i>
+                            <span>Browse Shop Catalog</span>
+                        </a>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            orders.forEach((order) => {
+                const orderId = order.id;
+                const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+                const status = (order.status || 'PENDING').toUpperCase();
+
+                let totalAmount = 0;
+                let itemsHtml = '';
+
+                if (order.orderItems && order.orderItems.length > 0) {
+                    order.orderItems.forEach((item, idx) => {
+                        const book = item.book || {};
+                        const title = book.title || 'Untitled Book';
+                        const author = book.author || 'Unknown Author';
+                        const qty = item.qty || item.quantity || 1;
+                        const price = book.price || 0;
+                        const itemTotal = price * qty;
+                        totalAmount += itemTotal;
+
+                        const defaultCover = placeholderImages[idx % placeholderImages.length];
+                        const cover = (book.imagePath && book.imagePath.trim() !== '') ? book.imagePath : defaultCover;
+
+                        itemsHtml += `
+                            <div class="flex items-center gap-4 py-3 border-b border-slate-100 last:border-0">
+                                <img src="${cover}" onerror="this.src='${defaultCover}'" class="w-14 h-18 object-cover rounded-xl shadow-sm border border-slate-200">
+                                <div class="flex-grow">
+                                    <h5 class="font-serif font-bold text-slate-800 text-base line-clamp-1">${title}</h5>
+                                    <p class="text-xs text-slate-500">${author}</p>
+                                    <p class="text-xs text-slate-600 mt-1">Qty: <span class="font-bold text-slate-800">${qty}</span> × Rs.${price.toFixed(2)}</p>
+                                </div>
+                                <div class="text-right font-bold text-slate-800 text-sm">
+                                    Rs.${itemTotal.toFixed(2)}
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                let statusBadge = '';
+                if (status === 'PENDING') {
+                    statusBadge = `<span class="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5"><i class="fa-solid fa-clock text-[10px]"></i> Pending</span>`;
+                } else if (status === 'CANCELLED') {
+                    statusBadge = `<span class="bg-red-50 text-red-700 border border-red-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5"><i class="fa-solid fa-ban text-[10px]"></i> Cancelled</span>`;
+                } else {
+                    statusBadge = `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5"><i class="fa-solid fa-check text-[10px]"></i> Completed</span>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden hover:shadow-md transition">
+
+                        <!-- Order Header -->
+                        <div class="bg-slate-50/80 p-5 md:px-6 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div>
+                                    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider block">Order ID</span>
+                                    <span class="font-serif font-bold text-slate-800 text-base">#ORD-${orderId}</span>
+                                </div>
+                                <div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+                                <div>
+                                    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider block">Date Placed</span>
+                                    <span class="text-sm font-medium text-slate-700">${orderDate}</span>
+                                </div>
+                            </div>
+                            <div>
+                                ${statusBadge}
+                            </div>
+                        </div>
+
+                        <!-- Order Items List -->
+                        <div class="p-5 md:p-6">
+                            <div class="divide-y divide-slate-100">
+                                ${itemsHtml || '<p class="text-xs text-slate-400 italic">No details available for this order.</p>'}
+                            </div>
+                        </div>
+
+                        <!-- Order Footer -->
+                        <div class="bg-slate-50/50 p-5 md:px-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="text-center sm:text-left">
+                                <span class="text-xs text-slate-500 font-medium">Total Amount Paid</span>
+                                <p class="text-2xl font-serif font-bold text-brand-dark">Rs.${totalAmount.toFixed(2)}</p>
+                            </div>
+
+                            ${status === 'PENDING' ? `
+                                <button onclick="cancelOrder(${orderId})"
+                                        class="w-full sm:w-auto bg-white border border-red-200 text-red-600 hover:bg-red-50 font-semibold px-5 py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <span>Cancel Order</span>
+                                </button>
+                            ` : ''}
+
+
+                            ${status === 'COMPLETED' || status === 'DELIVERED' ? `
+                            <button onclick="window.open('invoice.html?orderId=${orderId}', '_blank')"
+                                    class="w-full sm:w-auto bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 px-4 py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-file-invoice text-amber-600"></i>
+                                <span>View Invoice</span>
+                            </button>
+                        ` : ''}
+                        </div>
+
+                    </div>
+                `;
+            });
+
+        } catch (err) {
+            container.innerHTML = `
+                <div class="text-center py-12 bg-white rounded-3xl border border-slate-200/80">
+                    <i class="fa-solid fa-circle-exclamation text-4xl text-red-400 mb-3"></i>
+                    <p class="font-serif text-lg text-slate-700">Failed to load orders. Please try again later.</p>
+                </div>`;
+        }
+    }
+
+    function showAlert(type, message) {
+        const box = document.getElementById('alertBox');
+        box.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200', 'bg-red-50', 'text-red-800', 'border-red-200');
+
+        if (type === 'success') {
+            box.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+            box.innerHTML = `<div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i> ${message}</div>`;
+        } else {
+            box.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+            box.innerHTML = `<div class="flex items-center gap-2"><i class="fa-solid fa-circle-exclamation text-red-600"></i> ${message}</div>`;
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setTimeout(() => {
+            box.classList.add('hidden');
+        }, 5000);
+    }
+
+    async function logout() {
+        try {
+            await fetch('api/auth/logout', {method: 'POST'});
+        } catch (e) {}
+        localStorage.removeItem('nova_user');
+        window.location.href = 'login.html';
+    }
+</script>
+
+<div id="footerContainer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("footer.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("footerContainer").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading footer:", err));
+    });
+</script>
+
+</body>
+</html>

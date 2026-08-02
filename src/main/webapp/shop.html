@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Books | Premium Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+          rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            accent: '#d97706',
+                            light: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light font-sans text-slate-800 antialiased selection:bg-brand-accent selection:text-white">
+
+<!-- Sticky Navigation -->
+<nav class="sticky top-0 z-40 backdrop-blur-lg bg-white/80 border-b border-gray-200 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                 onclick="window.location.href='shop.html'">
+                <i class="fa-solid fa-book-open text-brand-accent text-2xl"></i>
+                <span class="font-serif font-bold text-2xl tracking-tight text-brand-dark">Nova<span
+                        class="text-brand-accent">Books</span></span>
+            </div>
+
+
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                <a href="shop.html" class="text-brand-accent hover:text-amber-600 transition">Shop</a>
+                <a href="about.html" class="hover:text-brand-accent transition">About Us</a>
+                <a href="contact.html" class="hover:text-brand-accent transition">Contact Us</a>
+                <a href="my-orders.html" class="hover:text-brand-accent transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-box-archive text-xs"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="profile.html" class="hover:text-brand-accent transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-user text-xs"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+
+            <!-- Right Actions & User Profile -->
+            <div class="flex items-center gap-4 sm:gap-6">
+
+                <!-- Welcome Note (Hidden by default, shown when logged in) -->
+                <div id="userWelcome"
+                     class="hidden sm:flex items-center gap-2 text-sm text-slate-600 font-medium border-r border-slate-200 pr-4 sm:pr-6">
+                    <i class="fa-regular fa-circle-user text-brand-accent text-lg"></i>
+                    <span>Welcome, <strong id="userName" class="text-brand-dark">Guest</strong>!</span>
+                </div>
+
+                <!-- Cart Button -->
+                <button onclick="toggleCart(true)"
+                        class="relative text-slate-600 hover:text-brand-accent transition p-2">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="cartBadge"
+                          class="absolute top-0 right-0 bg-brand-accent text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center hidden">0</span>
+                </button>
+
+                <div class="h-6 w-px bg-gray-300"></div>
+
+                <!-- Dynamic Auth Actions -->
+                <div id="authActions">
+                    <!-- Login Button (Shown when logged out) -->
+                    <a id="loginBtn" href="login.html"
+                       class="hidden flex items-center gap-2 text-sm font-semibold text-brand-accent hover:text-yellow-600 transition bg-amber-50 px-4 py-2 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </a>
+
+                    <!-- Logout Button (Shown when logged in) -->
+                    <button id="logoutBtn" onclick="logout()"
+                            class="hidden flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-red-600 transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Sign Out</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Store Catalog -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Banner -->
+    <div class="bg-brand-dark rounded-3xl overflow-hidden mb-12 shadow-2xl relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-brand-dark to-transparent z-10"></div>
+        <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2000&q=80"
+             alt="Library" class="absolute inset-0 w-full h-full object-cover opacity-40">
+
+        <div class="relative z-20 p-10 md:p-16 w-full md:w-2/3">
+            <span class="text-brand-accent font-semibold tracking-wider text-sm uppercase mb-3 block">Curated Collection</span>
+            <h2 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight">Discover Your Next<br>Great
+                Adventure.</h2>
+            <p class="text-slate-300 text-lg mb-8 max-w-md">Explore our handpicked selection of bestsellers and classic
+                literature.</p>
+        </div>
+    </div>
+
+    <!-- ADVANCED SEARCH & FILTER SECTION -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <!-- Search Input -->
+            <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Search
+                    Catalog</label>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+                    <input type="text" id="searchInput" placeholder="Search by book title or author..."
+                           class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+                </div>
+            </div>
+
+            <!-- Min Price -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Min Price
+                    (Rs.)</label>
+                <input type="number" id="minPriceInput" placeholder="0"
+                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+            </div>
+
+            <!-- Max Price -->
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Max Price
+                    (Rs.)</label>
+                <input type="number" id="maxPriceInput" placeholder="10000"
+                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent outline-none text-sm transition">
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
+            <button onclick="resetFilters()"
+                    class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition">
+                Reset Filters
+            </button>
+            <button onclick="applyFilters()"
+                    class="bg-brand-dark hover:bg-brand-accent text-white px-6 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-filter"></i> Apply Filters
+            </button>
+        </div>
+    </div>
+
+    <h3 class="text-3xl font-serif font-bold text-brand-dark mb-8">Latest Arrivals</h3>
+
+    <!-- Book Grid -->
+    <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <!-- Loaded via JS -->
+    </div>
+
+    <!-- PAGINATION CONTROLS -->
+    <div id="paginationContainer"
+         class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12 pt-6 border-t border-slate-200">
+        <span id="pageInfo" class="text-sm font-medium text-slate-500">Showing page 1 of 1</span>
+        <div class="flex gap-2">
+            <button id="prevPageBtn" onclick="changePage(-1)"
+                    class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">
+                <i class="fa-solid fa-chevron-left mr-1.5"></i> Previous
+            </button>
+            <button id="nextPageBtn" onclick="changePage(1)"
+                    class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm">
+                Next <i class="fa-solid fa-chevron-right ml-1.5"></i>
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- SLIDE-OVER CART DRAWER -->
+<div id="cartDrawerOverlay" class="fixed inset-0 bg-brand-dark/50 backdrop-blur-sm z-50 hidden transition-opacity"
+     onclick="toggleCart(false)"></div>
+
+<div id="cartDrawer"
+     class="fixed inset-y-0 right-0 max-w-full flex z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+    <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+
+        <!-- Cart Header -->
+        <div class="p-6 bg-brand-dark text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-bag-shopping text-brand-accent text-xl"></i>
+                <h2 class="text-xl font-serif font-bold">Your Shopping Cart</h2>
+            </div>
+            <button onclick="toggleCart(false)" class="text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Cart Alert Message -->
+        <div id="checkoutAlert" class="hidden m-4 p-3 rounded-xl text-sm font-medium flex items-center gap-2"></div>
+
+        <!-- Cart Items Container -->
+        <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Items populated by JS -->
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="p-6 border-t border-slate-200 bg-slate-50">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-slate-500 font-medium">Subtotal</span>
+                <span id="cartSubtotal" class="text-2xl font-serif font-bold text-brand-dark">Rs.0.00</span>
+            </div>
+
+            <a href="checkout.html">
+                <button onclick="checkout()"
+                        class="w-full bg-brand-accent hover:bg-yellow-600 text-white font-semibold py-3.5 rounded-xl transition duration-300 shadow-lg shadow-brand-accent/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lock text-sm"></i>
+                   <span>Proceed to Checkout</span>
+                </button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const placeholderImages = [
+        'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
+        'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400',
+        'https://images.unsplash.com/photo-1629196914208-410061e81561?auto=format&fit=crop&q=80&w=400'
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('nova_cart')) || [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        checkAuthStatus();
+        loadBooks();
+        updateCartUI();
+    });
+
+    async function checkAuthStatus() {
+        const userWelcome = document.getElementById('userWelcome');
+        const userName = document.getElementById('userName');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        try {
+            const response = await fetch('api/auth/me');
+            const data = await response.json();
+
+            if (data.isLoggedIn) {
+                userWelcome.classList.remove('hidden');
+                userName.textContent = data.firstName || 'Reader';
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userWelcome.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        } catch (err) {
+            const localUser = JSON.parse(localStorage.getItem('nova_user'));
+            if (localUser && localUser.firstName) {
+                userWelcome.classList.remove('hidden');
+                userName.textContent = localUser.firstName;
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                userWelcome.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        }
+    }
+
+    let currentPage = 1;
+    let totalPages = 1;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        checkAuthStatus();
+        loadBooks();
+        updateCartUI();
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+    });
+
+    async function loadBooks(page = 1) {
+        const bookGrid = document.getElementById('bookGrid');
+        const searchVal = document.getElementById('searchInput').value.trim();
+        const minPriceVal = document.getElementById('minPriceInput').value.trim();
+        const maxPriceVal = document.getElementById('maxPriceInput').value.trim();
+
+        let queryParams = new URLSearchParams({
+            page: page,
+            limit: 8
+        });
+
+        if (searchVal) queryParams.append('q', searchVal);
+        if (minPriceVal) queryParams.append('minPrice', minPriceVal);
+        if (maxPriceVal) queryParams.append('maxPrice', maxPriceVal);
+
+        try {
+            const response = await fetch(`api/books?${queryParams.toString()}`);
+            const data = await response.json();
+
+            bookGrid.innerHTML = '';
+            const books = data.books || [];
+
+            if (books.length === 0) {
+                bookGrid.innerHTML = `
+                <div class="col-span-full text-center py-12 bg-white rounded-3xl border border-slate-200/80">
+                    <i class="fa-solid fa-magnifying-glass-minus text-4xl text-slate-300 mb-3"></i>
+                    <p class="font-serif text-lg text-slate-600">No books found matching your criteria.</p>
+                </div>`;
+                updatePaginationUI(1, 1, 0);
+                return;
+            }
+
+            books.forEach((book, index) => {
+                const defaultFallback = placeholderImages[index % placeholderImages.length];
+                const cover = (book.imagePath && book.imagePath.trim() !== '') ? book.imagePath : defaultFallback;
+                const price = book.price ? book.price : 0;
+                const uniqueId = book.id || book.bookId || (index + 1);
+                const isLiked = wishlist.includes(String(uniqueId));
+                const heartClass = isLiked ? 'fa-solid text-red-500' : 'fa-regular text-slate-400';
+
+                bookGrid.innerHTML += `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl transition duration-300 relative">
+
+            <button onclick="event.stopPropagation(); toggleWishlist('${uniqueId}')"
+                    class="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-2 rounded-full shadow-md hover:scale-110 transition z-20">
+                <i class="${heartClass} fa-heart text-lg"></i>
+            </button>
+
+            <a href="product-detail.html?id=${uniqueId}" class="block relative h-64 overflow-hidden bg-slate-100">
+                <img src="${cover}"
+                     onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400'"
+                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            </a>
+
+            <div class="p-5 flex flex-col flex-grow">
+                <a href="product-detail.html?id=${uniqueId}" class="block">
+                    <h4 class="font-serif font-bold text-lg text-brand-dark mb-1 line-clamp-1 hover:text-brand-accent transition">
+                        ${book.title || 'Untitled'}
+                    </h4>
+                </a>
+
+                <p class="text-sm text-slate-500 mb-4">${book.author || 'Unknown Author'}</p>
+
+                <div class="mt-auto flex justify-between items-center pt-3 border-t border-slate-100">
+                    <span class="text-xl font-bold text-brand-dark">Rs.${price.toFixed(2)}</span>
+
+                    <button onclick="event.stopPropagation(); addToCart('${uniqueId}', '${escapeQuotes(book.title)}', ${price}, '${cover}')"
+                            class="bg-brand-dark text-white hover:bg-brand-accent px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-cart-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+            });
+
+            currentPage = data.currentPage || 1;
+            totalPages = data.totalPages || 1;
+            updatePaginationUI(currentPage, totalPages, data.totalBooks || 0);
+
+        } catch (err) {
+            bookGrid.innerHTML = '<p class="text-red-500 col-span-full">Failed to load catalog.</p>';
+        }
+    }
+
+    function updatePaginationUI(page, maxPages, totalItems) {
+        document.getElementById('pageInfo').textContent = `Showing page ${page} of ${maxPages} (${totalItems} total books)`;
+        document.getElementById('prevPageBtn').disabled = (page <= 1);
+        document.getElementById('nextPageBtn').disabled = (page >= maxPages);
+    }
+
+    function changePage(delta) {
+        const targetPage = currentPage + delta;
+        if (targetPage >= 1 && targetPage <= totalPages) {
+            loadBooks(targetPage);
+            window.scrollTo({top: 400, behavior: 'smooth'});
+        }
+    }
+
+    function applyFilters() {
+        loadBooks(1);
+    }
+
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('minPriceInput').value = '';
+        document.getElementById('maxPriceInput').value = '';
+        loadBooks(1);
+    }
+
+    function toggleCart(open) {
+        const overlay = document.getElementById('cartDrawerOverlay');
+        const drawer = document.getElementById('cartDrawer');
+        if (open) {
+            overlay.classList.remove('hidden');
+            setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+        } else {
+            drawer.classList.add('translate-x-full');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+    }
+
+    function addToCart(book_id, title, price, image, qty = 1) {
+        const itemId = String(book_id);
+
+        const existing = cart.find(item => String(item.book_id || item.id) === itemId);
+
+        if (existing) {
+            existing.quantity += Number(qty);
+        } else {
+            cart.push({
+                book_id: itemId,
+                id: itemId,
+                title: title,
+                price: Number(price),
+                image: image,
+                quantity: Number(qty)
+            });
+        }
+
+        saveCart();
+        toggleCart(true);
+    }
+
+    function changeQty(id, delta) {
+        const itemId = String(id);
+        const item = cart.find(item => String(item.book_id || item.id) === itemId);
+
+        if (!item) return;
+
+        item.quantity += delta;
+
+        if (item.quantity <= 0) {
+            cart = cart.filter(i => String(i.book_id || i.id) !== itemId);
+        }
+
+        saveCart();
+    }
+
+    function saveCart() {
+        localStorage.setItem('nova_cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const badge = document.getElementById('cartBadge');
+        const list = document.getElementById('cartItemsList');
+        const subtotalEl = document.getElementById('cartSubtotal');
+
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const totalCost = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        if (totalItems > 0) {
+            badge.textContent = totalItems;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+
+        subtotalEl.textContent = `Rs.${totalCost.toFixed(2)}`;
+
+        if (cart.length === 0) {
+            list.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-basket-shopping text-5xl mb-3"></i>
+                        <p class="font-serif">Your cart is currently empty.</p>
+                    </div>`;
+            return;
+        }
+
+        list.innerHTML = cart.map(item => `
+                <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                    <img src="${item.image}" class="w-16 h-20 object-cover rounded-xl">
+                    <div class="flex-grow">
+                        <h5 class="font-bold text-sm text-brand-dark line-clamp-1">${item.title}</h5>
+                        <p class="text-xs text-brand-accent font-bold">Rs.${item.price.toFixed(2)}</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <button onclick="changeQty('${item.book_id}', -1)" class="w-6 h-6 rounded-lg bg-white border text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-100">-</button>
+                            <span class="text-xs font-semibold">${item.quantity}</span>
+                            <button onclick="changeQty('${item.book_id}', 1)" class="w-6 h-6 rounded-lg bg-white border text-slate-600 flex items-center justify-center text-xs font-bold hover:bg-slate-100">+</button>
+                        </div>
+                    </div>
+                    <button onclick="changeQty('${item.book_id}', -${item.quantity})" class="text-slate-300 hover:text-red-500 p-2 transition">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                    </button>
+                </div>
+            `).join('');
+    }
+
+    let wishlist = JSON.parse(localStorage.getItem('nova_wishlist')) || [];
+
+    function checkout() {
+        if (cart.length === 0) return;
+
+        const totalCost = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        document.getElementById('modalPayableAmount').textContent = `Rs. ${totalCost.toFixed(2)}`;
+
+        toggleCart(false);
+        document.getElementById('paymentModal').classList.remove('hidden');
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+    }
+
+    function toggleWishlist(bookId) {
+        const id = String(bookId);
+        if (wishlist.includes(id)) {
+            wishlist = wishlist.filter(item => item !== id);
+        } else {
+            wishlist.push(id);
+        }
+        localStorage.setItem('nova_wishlist', JSON.stringify(wishlist));
+        loadBooks(currentPage);
+    }
+
+    async function logout() {
+        try {
+            await fetch('api/auth/logout', {method: 'POST'});
+        } catch (e) {
+        }
+        localStorage.removeItem('nova_user');
+        window.location.href = 'login.html';
+    }
+
+    function escapeQuotes(str) {
+        return str ? str.replace(/'/g, "\\'") : '';
+    }
+</script>
+
+<div id="footerContainer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("footer.html")
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("footerContainer").innerHTML = data;
+            })
+            .catch(err => console.error("Error loading footer:", err));
+    });
+</script>
+</body>
+</html>
